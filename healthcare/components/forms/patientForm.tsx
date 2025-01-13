@@ -9,7 +9,8 @@ import CustomFormField from "../ui/customFormField";
 import SubmitButton from "../ui/submitButton";
 import { useState } from "react";
 import { userFormValidation } from "@/lib/validation";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
+import { createUser } from "@/lib/actions/patient.actions";
 
 export enum FormFieldType {
   INPUT = "input",
@@ -19,42 +20,47 @@ export enum FormFieldType {
   DATE_PICKER = "datePicker",
   SELECT = "select",
   SKELETON = "skeleton",
+  EMAIL = "email",
 }
 
-
-
-export function patientForm() {
-
-    const router = useRouter;
-
+const PatientForm = () => {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  // 1. Define your form.
+
   const form = useForm<z.infer<typeof userFormValidation>>({
     resolver: zodResolver(userFormValidation),
     defaultValues: {
-      name: "",
+      name: "", 
       email: "",
-      phone :""
+      phone: "",
     },
   });
 
-  // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof userFormValidation>) {
+  const onSubmit = async (values: z.infer<typeof userFormValidation>) => {
     setIsLoading(true);
+    console.log("Form submitted with values:", values); // Debugging
 
     try {
-        // const userData = {name, email, phone};
-        // const user = await createUser(userData)
-        // if (user) router.push(`/patients/${user.$id}/register`)
+      const user = await createUser(values);
+      if (user) router.push(`/patients/${user.$id}/register`);
     } catch (error) {
-        console.log(error)
-        
+      console.log(error);
+    } finally {
+      setIsLoading(false);
     }
-  }
+  };
+
+  console.log("Form errors:", form.formState.errors); // Debugging
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 flex-1">
+      <form
+        onSubmit={form.handleSubmit((values) => {
+          console.log("Form submission triggered with values:", values); // Debugging
+          onSubmit(values);
+        })}
+        className="space-y-6 flex-1"
+      >
         <section className="mb-12 space-y-4">
           <h1 className="header">Hi there 👋 </h1>
           <p className="text-dark-700">Schedule your first appointment</p>
@@ -62,12 +68,12 @@ export function patientForm() {
         <CustomFormField
           control={form.control}
           fieldType={FormFieldType.INPUT}
-          name="name"
+          name="name" // Updated to match schema
           label="Full Name"
-          placeholder="John Doe"
+          placeholder="JohnDoe"
           iconSrc="/assets/icons/user.svg"
           iconAlt="user"
-        ></CustomFormField>
+        />
         <CustomFormField
           control={form.control}
           fieldType={FormFieldType.INPUT}
@@ -76,17 +82,18 @@ export function patientForm() {
           placeholder="John.Doe@gmail.com"
           iconSrc="/assets/icons/email.svg"
           iconAlt="email"
-        ></CustomFormField>
+        />
         <CustomFormField
           control={form.control}
           fieldType={FormFieldType.PHONE}
           name="phone"
-          label="phone number"
-          placeholder="(+216) 56 708 853 "
-        ></CustomFormField>
-        <SubmitButton isLoading={isLoading}>get Started</SubmitButton>{" "}
+          label="Phone Number"
+          placeholder="(+216) 56 708 853"
+        />
+        <SubmitButton isLoading={isLoading}>Get Started</SubmitButton>
       </form>
     </Form>
   );
-}
-export default patientForm;
+};
+
+export default PatientForm;

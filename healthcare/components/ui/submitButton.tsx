@@ -1,13 +1,14 @@
 import React from "react";
-import { Button, ButtonProps } from "./button";
+import { Button } from "./button";
 import Image from "next/image";
 
-interface buttonProps {
+interface SubmitButtonProps {
   isLoading: boolean;
   className?: string;
-  children?: React.ReactNode;
+  children: React.ReactNode;
 }
-const submitButton = ({ isLoading, className, children }: ButtonProps) => {
+
+const SubmitButton = ({ isLoading, className, children }: SubmitButtonProps) => {
   return (
     <Button
       type="submit"
@@ -21,14 +22,14 @@ const submitButton = ({ isLoading, className, children }: ButtonProps) => {
             alt={"loader"}
             width={24}
             height={24}
-          ></Image>
+            className="animate-spin"
+          />
           <span>Loading...</span>
         </div>
-      ) : 
+      ) : (
         children
-      }
+      )}
     </Button>
   );
 };
-
-export default submitButton;
+export default SubmitButton;
